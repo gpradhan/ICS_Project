@@ -8,14 +8,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.HttpRequest;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -47,7 +53,7 @@ import com.info.service.UserService;
 @Scope("session")
 public class OCController {
 
-	Logger logger = LoggerFactory.getLogger(OCController.class);
+	private static final Logger logger = Logger.getLogger(OCController.class);
 
 	@Autowired
 	private UserService userService;
@@ -55,6 +61,9 @@ public class OCController {
 	private MessageService messageService;
 	@Autowired
 	private ChatRoomService chatRoomService;
+
+	@Resource(name = "authenticationManager")
+	private AuthenticationManager authManager;
 
 	@GetMapping({ "/" })
 	public String index(Locale locale, Model model) {
@@ -69,11 +78,13 @@ public class OCController {
 
 	@GetMapping({ "/index" })
 	public String index1(Locale locale, Model model) {
+		logger.debug("showing index");
 		return "index";
 	}
 
 	@GetMapping({ "/adminloginform" })
 	public String adminloginform(Locale locale, Model model) {
+		logger.info("showing adminloginform");
 		model.addAttribute("myUser", new User());
 		return "adminloginform";
 	}
@@ -393,7 +404,7 @@ public class OCController {
 		chatMessage.setMessageBody(user.getUserName() + " : " + chatMessage.getMessageBody());
 		chatMessage.setTime(new Date());
 		ChatRoom chatRoom = (ChatRoom) session.getAttribute("chatRoomSessionObj");
-//		chatMessage.setChatRoom(chatRoom);
+		// chatMessage.setChatRoom(chatRoom);
 
 		// save file
 		List<MultipartFile> files = chatMessage.getFile();
@@ -403,7 +414,6 @@ public class OCController {
 			for (MultipartFile multipartFile : files) {
 
 				String fileName = multipartFile.getOriginalFilename();
-				
 
 				// File imageFile = new
 				// File(servletRequest.getServletContext().getRealPath("../resources/images"),
@@ -676,7 +686,7 @@ public class OCController {
 	@GetMapping({ "/userLogin" })
 	public String userLogin(Locale locale, Model model, HttpSession session) {
 		User user = this.setSessionUserToModel(session, model);
-		return this.returnHomePage(user);
+		return returnHomePage(user);
 	}
 
 	@GetMapping({ "/logo" })
@@ -703,7 +713,7 @@ public class OCController {
 
 	@PostMapping({ "/userLogin" })
 	public String login(@ModelAttribute("myUser") @Valid User myUser, BindingResult result, Model model,
-			HttpSession session, ModelAndView mav) {
+			HttpSession session, ModelAndView mav,HttpServletRequest request) {
 		String returnString = "";
 		User userFromDB = null;
 		if (result.hasErrors()) {
@@ -717,6 +727,8 @@ public class OCController {
 
 		if ((userFromDB = this.userService.findByUserAndPassword(myUser)) != null) {
 			if (userFromDB.getActivate().equals("y")) {
+				//use spring security to authenticate
+//				authenticate(userFromDB.getUserName(), userFromDB.getPassword(), request);
 				this.userService.login(userFromDB.getId());
 				session.setAttribute("user", userFromDB);
 				this.setSessionUserToModel(session, model);
@@ -745,6 +757,16 @@ public class OCController {
 
 		return returnString;
 	}
+	
+	private void authenticate(final String username,
+			final String password, final HttpServletRequest request) {
+		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
+		Authentication auth = authManager.authenticate(authReq);
+		SecurityContext sc = SecurityContextHolder.getContext();
+		sc.setAuthentication(auth);
+		HttpSession session = request.getSession(true);
+		session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
+	}
 
 	private String getOnlineStatus(User user) {
 		return user.getLogoutTime() == null ? "Online" : "Offline";
@@ -765,10 +787,15 @@ public class OCController {
 	@GetMapping({ "/logout" })
 	public String logoutAdmin(Locale locale, Model model, WebRequest request, HttpSession session,
 			SessionStatus status) {
-		User user = this.setSessionUserToModel(session, model);
-		this.userService.logout(user.getId());
-		status.setComplete();
-		session.invalidate();
+		try {
+			User user = this.setSessionUserToModel(session, model);
+			this.userService.logout(user.getId());
+		} catch (NullPointerException e) {
+			// do nothing
+		} finally {
+			status.setComplete();
+			session.invalidate();
+		}
 		return "redirect:/";
 	}
 }

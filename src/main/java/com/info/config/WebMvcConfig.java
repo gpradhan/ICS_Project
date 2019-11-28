@@ -11,11 +11,15 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
+
+import com.info.interceptor.LoggerInterceptor;
+import com.info.interceptor.SessionTimerInterceptor;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -93,5 +97,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	// public StandardServletMultipartResolver multipartResolver() {
 	// return new StandardServletMultipartResolver();
 	// }
+	
+	@Override
+    public void addInterceptors(final InterceptorRegistry registry) {
+        registry.addInterceptor(new LoggerInterceptor());
+//        registry.addInterceptor(new UserInterceptor());
+        registry.addInterceptor(new SessionTimerInterceptor());
+    }
 
 }

@@ -1,9 +1,7 @@
 package com.info.model;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -60,7 +58,7 @@ public class ChatRoom  extends SuperEntity{
       cascade = {CascadeType.ALL},
       fetch = FetchType.EAGER
    )
-   private Set<ChatMessage> chatRoomMessages = new HashSet<>();
+   private Set<ChatMessage> chatRoomMessages = new TreeSet<>((o1, o2) -> (int)(o1.getTime().getTime()- o2.getTime().getTime()));
 
    public Integer getId() {
       return this.id;
@@ -95,8 +93,6 @@ public class ChatRoom  extends SuperEntity{
    }
 
    public Set<ChatMessage> getChatRoomMessages() {
-//     Collections.sort(this.chatRoomMessages,(o1, o2) -> (int)(o1.getTime().getTime()- o2.getTime().getTime()));
-     
      return this.chatRoomMessages;
    }
 
