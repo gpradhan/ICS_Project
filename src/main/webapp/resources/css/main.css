@@ -1,6 +1,8 @@
 body {
 	background-color: #00FFFF;
+	height: 500px;
 }
+
 
 .error {
 	color: red;

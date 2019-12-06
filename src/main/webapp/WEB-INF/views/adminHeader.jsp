@@ -2,7 +2,7 @@
 	pageEncoding="ISO-8859-1"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ page isELIgnored="false"%>
+<%@ page isELIgnored="false" session="true"%>
 <%@ include file="/WEB-INF/views/commonCssAndJS.jsp"%>
 <!DOCTYPE html>
 <html>
@@ -30,4 +30,4 @@
 		</div>
 		<!-- <div style="padding-left: 300px; z-index=1; position: absolute; float: top"  > -->
 
-		<div align="center" style="top: 25%; position: fixed; width: 100%">
+		<div align="center" style="top: 25%; position: relative; width: 100%;" >

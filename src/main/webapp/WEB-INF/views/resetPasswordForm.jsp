@@ -1,11 +1,12 @@
+<%@page session="false" %>
 <%@ include file="/WEB-INF/views/indexHeader.jsp"%>
 
 <h3>Change Password</h3>
 <br>
 <c:if test="${!empty resultMessage}">
-	<h3>${resultMessage}</h3>
+	<h3 style="color: blue">${resultMessage}</h3>
 </c:if>
-<c:if test="${empty resultMessage}">
+<%-- <c:if test="${empty resultMessage}"> --%>
 
 	<form:form action="resetPassword" method="post"
 		modelAttribute="myUser" style="width:300px">
@@ -16,7 +17,7 @@
 		</div>
 		<div class="form-group">
 			<label for="oldPassword">Old Password</label>
-			<form:input class="form-control" path="oldPassword" id="oldPassword"
+			<form:password class="form-control" path="oldPassword" id="oldPassword"
 				placeholder="Old Password"/>
 		</div>
 		<div class="form-group">
@@ -41,5 +42,5 @@
 		</div>
 		<button type="submit" class="btn btn-primary">Reset Password</button>
 	</form:form>
-</c:if>
+<%-- </c:if> --%>
 <%@ include file="/WEB-INF/views/indexFooter.jsp"%>

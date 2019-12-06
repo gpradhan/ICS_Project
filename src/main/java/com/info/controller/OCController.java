@@ -4,16 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import org.apache.http.HttpRequest;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -96,8 +99,9 @@ public class OCController {
 	}
 
 	@GetMapping({ "/forgotPassword" })
-	public String forgotPassword(Locale locale, Model model) {
+	public String forgotPassword(Locale locale, Model model, HttpServletRequest request) {
 		model.addAttribute("myUser", new User());
+		model.addAttribute("resultMessage", request.getParameter("resultMessage"));
 		return "resetPasswordForm";
 	}
 
@@ -384,8 +388,8 @@ public class OCController {
 		chatMessage.setUserName(userName);
 		ChatRoom chatRoom = (ChatRoom) session.getAttribute("chatRoomSessionObj");
 		model.addAttribute("chatMessage", chatMessage);
-		ChatRoom chatRoomFromDB = this.chatRoomService.findByRoomAndKey(chatRoom);
-		model.addAttribute("chatmessages", this.getChatMessages(chatRoomFromDB));
+		ChatRoom chatRoomFromDB = chatRoomService.findByRoomAndKey(chatRoom);
+		model.addAttribute("chatmessages", getChatMessages(chatRoomFromDB));
 	}
 
 	@GetMapping({ "/chatRoom" })
@@ -401,30 +405,37 @@ public class OCController {
 			HttpServletRequest servletRequest, HttpSession session) {
 		logger.info("***************inside sendChatMessage()*************");
 		User user = this.setSessionUserToModel(session, model);
-		chatMessage.setMessageBody(user.getUserName() + " : " + chatMessage.getMessageBody());
+		// chatMessage.setMessageBody(user.getUserName() + " : " +
+		// chatMessage.getMessageBody());
 		chatMessage.setTime(new Date());
 		ChatRoom chatRoom = (ChatRoom) session.getAttribute("chatRoomSessionObj");
 		// chatMessage.setChatRoom(chatRoom);
 
 		// save file
 		List<MultipartFile> files = chatMessage.getFile();
-		System.out.println("files.size()" + files.size());
+
 		List<String> fileNames = new ArrayList<String>();
 		if (null != files && files.size() > 0) {
 			for (MultipartFile multipartFile : files) {
 
 				String fileName = multipartFile.getOriginalFilename();
 
-				// File imageFile = new
-				// File(servletRequest.getServletContext().getRealPath("../resources/images"),
-				// fileName);
-
 				File imageFile = null;
 				if (!fileName.equals("")) {
 					fileNames.add(fileName);
-					imageFile = new File("C:\\GSP\\tmp", fileName);
+
+					// imageFile = new File( fileName);
+					File uploadsFolder = new File(servletRequest.getServletContext().getRealPath("resources/uploads"));
+					if(!uploadsFolder.exists()){
+							uploadsFolder.mkdir();
+					}
+					imageFile = new File(servletRequest.getServletContext().getRealPath("resources/uploads"),
+							fileName);
+
 					try {
 						multipartFile.transferTo(imageFile);
+						chatMessage.setMessageBody(
+								chatMessage.getMessageBody() + "#FileName%%%" + fileName);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -433,21 +444,43 @@ public class OCController {
 		}
 		// clear file list
 		chatMessage.getFile().clear();
-
-		this.chatRoomService.saveChatRoomMessage(chatRoom, chatMessage);
+		if (!fileNames.isEmpty() || chatMessage.getMessageBody().length() > 0) {
+			chatMessage.setMessageBody(user.getUserName() + " : " + chatMessage.getMessageBody());
+			this.chatRoomService.saveChatRoomMessage(chatRoom, chatMessage);
+		}
 		this.buildChatRoom(user.getUserName(), model, session);
 		return "chatRoom";
 	}
 
 	private String getChatMessages(ChatRoom chatRoom) {
+		Set<String> imgExtensions = new HashSet<>();
+		imgExtensions.add("jpg");
+		imgExtensions.add("jpeg");
+		imgExtensions.add("png");
+		imgExtensions.add("gif");
 		StringBuilder chatmessages = new StringBuilder();
+		String imgPrefix = "<img src=\"/Office-Communicator/resources/uploads/";
+		String imgPostfix = "\" alt=\"Image not available\" style=\"height:200px;width:300px\"/>";
+		String downloadLinkPreFix= "<a href=\"/Office-Communicator/resources/uploads/";
+		String downloadLinkPostFix= "</a>";
 		if (!chatRoom.getChatRoomMessages().isEmpty()) {
-			Iterator var3 = chatRoom.getChatRoomMessages().iterator();
+			Set<ChatMessage> messages = new TreeSet<>((o1, o2) -> (int) (o1.getId() - o2.getId()));
+			messages.addAll(chatRoom.getChatRoomMessages());
 
-			while (var3.hasNext()) {
-				ChatMessage chatMessage = (ChatMessage) var3.next();
-				chatmessages.append(chatMessage.getMessageBody());
-				chatmessages.append("\n");
+			for (ChatMessage chatMessage : messages) {
+				for (String m : chatMessage.getMessageBody().split("#")) {
+					if (m.contains("FileName%%%")) {
+						String fileName = m.replace("FileName%%%", "");
+						if(imgExtensions.contains(fileName.split("[.]")[1])){
+							m = imgPrefix + fileName + imgPostfix;
+						}else{
+							m = downloadLinkPreFix+ fileName +"\">"+ fileName +downloadLinkPostFix;
+						}
+					}
+					chatmessages.append(m);
+					// chatmessages.append("\n");
+					chatmessages.append("<br/>");
+				}
 			}
 		}
 
@@ -531,6 +564,26 @@ public class OCController {
 
 		this.setSessionUserToModel(session, model);
 		return this.returnPasswordPage(myUser);
+	}
+
+	@PostMapping({ "/resetPassword" })
+	public String resetPassword(@ModelAttribute("myUser") @Valid User myUser, Locale locale, Model model) {
+		String resultMessage;
+		if (!myUser.getPassword().equals(myUser.getConfirmPassword())) {
+			resultMessage = "New password is not matching with ConfirmPassword";
+			model.addAttribute("resultMessage", resultMessage);
+			return "redirect:/forgotPassword";
+		}
+		User user = userService.resetPassword(myUser);
+		if (user == null) {
+			resultMessage = "Please enter valid data.";
+			model.addAttribute("resultMessage", resultMessage);
+			model.addAttribute("resultMessage1", resultMessage + "11111");
+		} else {
+			resultMessage = "Password changed Successfully.";
+			model.addAttribute("resultMessage", resultMessage);
+		}
+		return "redirect:/forgotPassword";
 	}
 
 	private String returnPasswordPage(User user) {
@@ -713,7 +766,7 @@ public class OCController {
 
 	@PostMapping({ "/userLogin" })
 	public String login(@ModelAttribute("myUser") @Valid User myUser, BindingResult result, Model model,
-			HttpSession session, ModelAndView mav,HttpServletRequest request) {
+			HttpSession session, ModelAndView mav, HttpServletRequest request) {
 		String returnString = "";
 		User userFromDB = null;
 		if (result.hasErrors()) {
@@ -727,10 +780,12 @@ public class OCController {
 
 		if ((userFromDB = this.userService.findByUserAndPassword(myUser)) != null) {
 			if (userFromDB.getActivate().equals("y")) {
-				//use spring security to authenticate
-//				authenticate(userFromDB.getUserName(), userFromDB.getPassword(), request);
+				// use spring security to authenticate
+				// authenticate(userFromDB.getUserName(),
+				// userFromDB.getPassword(), request);
 				this.userService.login(userFromDB.getId());
 				session.setAttribute("user", userFromDB);
+
 				this.setSessionUserToModel(session, model);
 
 				if (userFromDB.getUserName().equals("admin")) {
@@ -757,9 +812,8 @@ public class OCController {
 
 		return returnString;
 	}
-	
-	private void authenticate(final String username,
-			final String password, final HttpServletRequest request) {
+
+	private void authenticate(final String username, final String password, final HttpServletRequest request) {
 		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
 		Authentication auth = authManager.authenticate(authReq);
 		SecurityContext sc = SecurityContextHolder.getContext();
@@ -785,14 +839,15 @@ public class OCController {
 	}
 
 	@GetMapping({ "/logout" })
-	public String logoutAdmin(Locale locale, Model model, WebRequest request, HttpSession session,
-			SessionStatus status) {
+	public String logoutAdmin(Locale locale, Model model, WebRequest request, HttpSession session, SessionStatus status,
+			HttpServletRequest httpServletRequest) throws ServletException {
 		try {
 			User user = this.setSessionUserToModel(session, model);
 			this.userService.logout(user.getId());
 		} catch (NullPointerException e) {
 			// do nothing
 		} finally {
+			httpServletRequest.logout();
 			status.setComplete();
 			session.invalidate();
 		}

@@ -27,7 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
    query = "from ContactBook c where c.id=:id"
 )})
 @Scope("session")
-public class ContactBook  extends SuperEntity{
+public class ContactBook  extends SuperEntity<ContactBook>{
    @Id
    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="ID_SEQUENCE")
    @SequenceGenerator(name="ID_SEQUENCE",sequenceName="CONTACTBOOK_SEQUENCE",allocationSize=1)
@@ -144,19 +144,19 @@ public class ContactBook  extends SuperEntity{
    }
 
 @Override
-public void loadDataFromDB(SuperEntity entity) {
+public void loadDataFromDB(ContactBook entity) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void loadDataFromUI(SuperEntity entity) {
+public void loadDataFromUI(ContactBook entity) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public int compare(SuperEntity o1, SuperEntity o2) {
+public int compare(ContactBook o1, ContactBook o2) {
 	// TODO Auto-generated method stub
 	return 0;
 }

@@ -12,6 +12,10 @@
 //    history.go(1);
 //};
 
+function scrollDownChatMessages(){
+	$('#messages').scrollTop($('#messages')[0].scrollHeight);
+}
+
 //disable refresh button
 $(function () {  
     $(document).keydown(function (e) {  

@@ -67,6 +67,21 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 	}
+	
+	@Transactional(readOnly = false)
+	public User resetPassword(User myUser) {
+		Object[] param= new Object[3];
+		param[0]=myUser.getUserName();
+		param[1]=myUser.getOldPassword();
+		param[2]=myUser.getAnswer();
+		try {
+			User user = userDao.getSingleResultByQuery("from User u where u.userName=?0 and u.password=?1 and u.answer=?2", param);
+			User.setUpdatedFormDataForPassword(myUser, user);
+			return (User) userDao.update(user);
+		} catch (Exception var5) {
+			return null;
+		}
+	}
 
 	@Transactional(readOnly = false)
 	public void delete(Integer id) {

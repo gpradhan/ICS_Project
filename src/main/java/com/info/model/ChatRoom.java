@@ -1,5 +1,7 @@
 package com.info.model;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -30,7 +32,7 @@ import org.springframework.context.annotation.Scope;
    query = "select o from ChatRoom o where o.roomName=:roomName and o.key=:key "
 )})
 @Scope("session")
-public class ChatRoom  extends SuperEntity{
+public class ChatRoom  extends SuperEntity<ChatRoom>{
    @Id
    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="ID_SEQUENCE")
    @SequenceGenerator(name="ID_SEQUENCE",sequenceName="CHATROOM_SEQUENCE",allocationSize=1)
@@ -58,8 +60,8 @@ public class ChatRoom  extends SuperEntity{
       cascade = {CascadeType.ALL},
       fetch = FetchType.EAGER
    )
-   private Set<ChatMessage> chatRoomMessages = new TreeSet<>((o1, o2) -> (int)(o1.getTime().getTime()- o2.getTime().getTime()));
-
+//   private Set<ChatMessage> chatRoomMessages = new TreeSet<>((o1, o2) -> (int)(o1.getTime().getTime()- o2.getTime().getTime()));
+	private Set<ChatMessage> chatRoomMessages = new TreeSet<>();
    public Integer getId() {
       return this.id;
    }
@@ -93,6 +95,7 @@ public class ChatRoom  extends SuperEntity{
    }
 
    public Set<ChatMessage> getChatRoomMessages() {
+//	   Collections.sort(this.chatRoomMessages);
      return this.chatRoomMessages;
    }
 
@@ -109,23 +112,24 @@ public class ChatRoom  extends SuperEntity{
    }
 
 @Override
-public void loadDataFromDB(SuperEntity entity) {
+public void loadDataFromDB(ChatRoom entity) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void loadDataFromUI(SuperEntity entity) {
+public void loadDataFromUI(ChatRoom entity) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public int compare(SuperEntity o1, SuperEntity o2) {
-	if((((ChatMessage)o1).getTime()).before(((ChatMessage)o2).getTime()))
-		return -1;
-	else if((((ChatMessage)o1).getTime()).before(((ChatMessage)o2).getTime()))
-		return 1;
-	else return 0;
+public int compare(ChatRoom o1, ChatRoom o2) {
+//	if((((ChatMessage)o1).getTime()).before(((ChatMessage)o2).getTime()))
+//		return -1;
+//	else if((((ChatMessage)o1).getTime()).before(((ChatMessage)o2).getTime()))
+//		return 1;
+//	else 
+		return 0;
 }
 }

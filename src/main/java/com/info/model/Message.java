@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Scope;
    query = "select o from Message o where o.toUser=:toUser"
 )
 @Scope("session")
-public class Message  extends SuperEntity{
+public class Message  extends SuperEntity<Message>{
    @Id
    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator="ID_SEQUENCE")
    @SequenceGenerator(name="ID_SEQUENCE",sequenceName="MESSAGE_SEQUENCE",allocationSize=1)
@@ -122,19 +122,19 @@ public class Message  extends SuperEntity{
    }
 
 @Override
-public void loadDataFromDB(SuperEntity entity) {
+public void loadDataFromDB(Message entity) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public void loadDataFromUI(SuperEntity entity) {
+public void loadDataFromUI(Message entity) {
 	// TODO Auto-generated method stub
 	
 }
 
 @Override
-public int compare(SuperEntity o1, SuperEntity o2) {
+public int compare(Message o1, Message o2) {
 	// TODO Auto-generated method stub
 	return 0;
 }

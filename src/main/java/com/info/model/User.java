@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Scope;
 		@NamedQuery(name = "User.findByEmpIdKeyAndUserName", query = "select o from User o where o.employeeId=:employeeId and o.key=:key and o.userName=:userName"),
 		@NamedQuery(name = "User.getUserByUserName", query = "select o.id from User o where o.userName=:userName") })
 @Scope("session")
-public class User extends SuperEntity {
+public class User extends SuperEntity<User> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ID_SEQUENCE")
 	@SequenceGenerator(name = "ID_SEQUENCE", sequenceName = "USER_SEQUENCE", initialValue=3,allocationSize=1)
@@ -254,13 +254,7 @@ public class User extends SuperEntity {
 		this.hintQuestion=hintQuestion;
 	}
 
-	public void loadDataFromDB(SuperEntity entity) {
-		
-		
-	}
-
-	public void loadDataFromUI(SuperEntity user) {
-		User userFromUI = (User) user;
+	public void loadDataFromUI(User userFromUI) {
 		if(userFromUI.getId()!=null)
 			this.setId(userFromUI.getId());
 		if(userFromUI.getActivate()!=null)
@@ -293,9 +287,15 @@ public class User extends SuperEntity {
 	}
 
 	@Override
-	public int compare(SuperEntity o1, SuperEntity o2) {
+	public int compare(User o1, User o2) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public void loadDataFromDB(User entity) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

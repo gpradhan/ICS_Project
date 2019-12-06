@@ -21,6 +21,7 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	protected String[] getServletMappings() {
 		return new String[] { "/" };
 	}
+	
 
 	protected Filter[] getServletFilters() {
 		return new Filter[] { new CORSFilter() };
@@ -45,5 +46,12 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	//
 	// appServlet.setMultipartConfig(multipartConfigElement);
 	// }
+	
+	@Override
+    public void onStartup(ServletContext sc) throws ServletException {
+//        sc.getSessionCookieConfig().setHttpOnly(true);        
+//        sc.getSessionCookieConfig().setSecure(true);    
+        super.onStartup(sc);
+    }
 
 }

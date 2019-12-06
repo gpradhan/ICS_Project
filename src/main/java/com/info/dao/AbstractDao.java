@@ -78,7 +78,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
    }
 
    public T getSingleResultByQuery(String hql, Object... params) {
-      try {
+
          TypedQuery<T> query = this.getSession().createQuery(hql);
          if (params != null) {
             for(int i = 0; i < params.length; ++i) {
@@ -87,8 +87,6 @@ public abstract class AbstractDao<PK extends Serializable, T> {
          }
 
          return query.getSingleResult();
-      } catch (NoResultException var5) {
-         return null;
-      }
+      
    }
 }

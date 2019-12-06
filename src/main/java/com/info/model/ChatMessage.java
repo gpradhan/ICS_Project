@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Entity
 @Table(name = "CHAT_MESSAGES")
 @Scope("session")
-public class ChatMessage extends SuperEntity {
+public class ChatMessage extends SuperEntity<ChatMessage> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ID_SEQUENCE")
 	@SequenceGenerator(name = "ID_SEQUENCE", sequenceName = "CHATMESSAGE_SEQUENCE",allocationSize=1)
@@ -111,21 +111,24 @@ public class ChatMessage extends SuperEntity {
 //	}
 
 	@Override
-	public void loadDataFromDB(SuperEntity entity) {
+	public void loadDataFromDB(ChatMessage entity) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void loadDataFromUI(SuperEntity entity) {
+	public void loadDataFromUI(ChatMessage entity) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public int compare(SuperEntity o1, SuperEntity o2) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compare(ChatMessage o1, ChatMessage o2) {
+		if((((ChatMessage)o1).getTime()).before(((ChatMessage)o2).getTime()))
+			return -1;
+		else if((((ChatMessage)o1).getTime()).after(((ChatMessage)o2).getTime()))
+			return 1;
+		else return 0;
 	}
 
 }
