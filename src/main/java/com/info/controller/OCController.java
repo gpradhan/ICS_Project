@@ -324,7 +324,8 @@ public class OCController {
 
 	@GetMapping({ "/myRoom" })
 	public String myRoom(Locale locale, Model model, HttpSession session) {
-		this.setSessionUserToModel(session, model);
+		User user = this.setSessionUserToModel(session, model);
+		model.addAttribute("myRoomsList",chatRoomService.getListByQuery("from ChatRoom c where c.owner.id=?0", user.getId()));
 		return "myRoom";
 	}
 

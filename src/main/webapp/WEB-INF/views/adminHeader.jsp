@@ -17,8 +17,12 @@
 			alt="banner1" id="banner1">
 		<div align="right" style="position: fixed; width: 98%">
 			<h4 style="color: yellow;">Welcome ${myUser.userName}</h4>
+			<h5 align="center"
+				style="color: yellow; background-color: #ffcccc; width: 50px;">
+				<a href="<c:out value='logout'/>">Logout</a>
+			</h5>
 		</div>
-		<div style="top: 10%; position: fixed; width:100%">
+		<div style="top: 10%; position: fixed; width: 100%">
 			<c:choose>
 				<c:when test="${myUser.userName=='admin'}">
 					<%@ include file="/WEB-INF/views/navadmin.jsp"%>
@@ -30,4 +34,4 @@
 		</div>
 		<!-- <div style="padding-left: 300px; z-index=1; position: absolute; float: top"  > -->
 
-		<div align="center" style="top: 25%; position: relative; width: 100%;" >
+		<div align="center" style="top: 25%; position: relative; width: 100%;">
