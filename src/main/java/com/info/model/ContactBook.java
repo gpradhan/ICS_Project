@@ -26,6 +26,10 @@ import org.springframework.format.annotation.DateTimeFormat;
    name = "ContactBook.getContactById",
    query = "from ContactBook c where c.id=:id"
 )})
+
+@org.hibernate.annotations.DynamicUpdate
+@org.hibernate.annotations.DynamicInsert(false)
+
 @Scope("session")
 public class ContactBook  extends SuperEntity<ContactBook>{
    @Id

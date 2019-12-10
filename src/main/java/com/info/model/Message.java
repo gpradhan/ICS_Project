@@ -22,6 +22,10 @@ import org.springframework.context.annotation.Scope;
    name = "Message.findByToUser",
    query = "select o from Message o where o.toUser=:toUser"
 )
+
+@org.hibernate.annotations.DynamicUpdate
+@org.hibernate.annotations.DynamicInsert(false)
+
 @Scope("session")
 public class Message  extends SuperEntity<Message>{
    @Id

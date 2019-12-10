@@ -31,6 +31,10 @@ import org.springframework.context.annotation.Scope;
    name = "Message.findByRoomAndKey",
    query = "select o from ChatRoom o where o.roomName=:roomName and o.key=:key "
 )})
+
+@org.hibernate.annotations.DynamicUpdate
+@org.hibernate.annotations.DynamicInsert(false)
+
 @Scope("session")
 public class ChatRoom  extends SuperEntity<ChatRoom>{
    @Id

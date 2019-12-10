@@ -22,6 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "CHAT_MESSAGES")
+
+@org.hibernate.annotations.DynamicUpdate
+@org.hibernate.annotations.DynamicInsert(false)
+
 @Scope("session")
 public class ChatMessage extends SuperEntity<ChatMessage> {
 	@Id

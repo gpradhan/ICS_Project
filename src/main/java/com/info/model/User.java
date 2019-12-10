@@ -28,6 +28,11 @@ import org.springframework.context.annotation.Scope;
 		@NamedQuery(name = "User.getMaxEmployeeId", query = "select max(o.employeeId) from User o"),
 		@NamedQuery(name = "User.findByEmpIdKeyAndUserName", query = "select o from User o where o.employeeId=:employeeId and o.key=:key and o.userName=:userName"),
 		@NamedQuery(name = "User.getUserByUserName", query = "select o.id from User o where o.userName=:userName") })
+
+@org.hibernate.annotations.DynamicUpdate
+@org.hibernate.annotations.DynamicInsert(false)
+@org.hibernate.annotations.SelectBeforeUpdate(true)
+
 @Scope("session")
 public class User extends SuperEntity<User> {
 	@Id
